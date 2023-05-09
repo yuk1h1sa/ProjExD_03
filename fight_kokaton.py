@@ -156,8 +156,9 @@ def main():
     beam = None
 
     tmr = 0
-    cnt = 0
+    cnt = 0 #scoreのカウントをする変数
     text1 = pygame.font.SysFont(None,50)
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -191,7 +192,7 @@ def main():
                     bird.change_img(6, screen)
                     break
         
-        text = text1.render("score"+str(cnt),True,(0,0,0))
+        text = text1.render("score :"+str(cnt),True,(0,0,0))
         screen.blit(text,[400,300])
 
         pg.display.update()
