@@ -4,6 +4,7 @@ import time
 import pygame as pg
 WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
+
 def check_bound(area: pg.Rect, obj: pg.Rect) -> tuple[bool, bool]:
     """
     オブジェクトが画面内か画面外かを判定し，真理値タプルを返す
@@ -17,6 +18,8 @@ def check_bound(area: pg.Rect, obj: pg.Rect) -> tuple[bool, bool]:
     if obj.top < area.top or area.bottom < obj.bottom:  # 縦方向のはみ出し判定
         tate = False
     return yoko, tate
+
+
 class Bird:
     """
     ゲームキャラクター（こうかとん）に関するクラス
@@ -41,8 +44,23 @@ class Bird:
             True, 
             False
         )
+        
+        img0 = pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0)
+        img1 = pg.transform.flip(img0,True,False)
+        self.images = {
+            (+1,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),True,False),
+            (+1,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),45,2.0),True,False),
+            (0,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),90,2.0),True,False),
+            (-1,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-45,2.0),False,True),
+            (-1,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),False,True),
+            (-1,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),45,2.0),False,True),
+            (0,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-90,2.0),True,False),
+            (+1,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-45,2.0),True,False),
+            (0,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),False,True)
+        }
         self._rct = self._img.get_rect()
         self._rct.center = xy
+
     def change_img(self, num: int, screen: pg.Surface):
         """
         こうかとん画像を切り替え，画面に転送する
@@ -51,20 +69,28 @@ class Bird:
         """
         self._img = pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"), 0, 2.0)
         screen.blit(self._img, self._rct)
+
     def update(self, key_lst: list[bool], screen: pg.Surface):
         """
         押下キーに応じてこうかとんを移動させる
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        sum_mv = [0,0]
         for k, mv in __class__._delta.items():
             if key_lst[k]:
                 self._rct.move_ip(mv)
+                sum.mv[0] += mv[0]
+                sum.mv[1] += mv[1]
         if check_bound(screen.get_rect(), self._rct) != (True, True):
             for k, mv in __class__._delta.items():
                 if key_lst[k]:
                     self._rct.move_ip(-mv[0], -mv[1])
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self._img = self.images[sum_mv[0],sum_mv[1]]
         screen.blit(self._img, self._rct)
+
+
 class Bomb:
     """
     爆弾に関するクラス
@@ -81,6 +107,7 @@ class Bomb:
         self._rct = self._img.get_rect()
         self._rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self._vx, self._vy = +1, +1
+
     def update(self, screen: pg.Surface):
         """
         爆弾を速度ベクトルself._vx, self._vyに基づき移動させる
@@ -99,6 +126,7 @@ class Beam:
     """
     ビームに関するクラス
     """
+
     def __init__(self, bird: Bird):
         """
         割愛
